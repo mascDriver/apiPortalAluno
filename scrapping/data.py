@@ -3,6 +3,7 @@ import json
 import httpx
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 
 from scrapping.bs4 import ParseHTML
 from scrapping.selenium import Browser
@@ -11,8 +12,7 @@ from scrapping.selenium import Browser
 def notas_semestre(session: str, login=None, senha=None) -> json.dumps:
     NAMES = ['ccr', 'turma', 'plano_de_ensino', 'total_de_faltas', 'frequencia', 'media_final', 'notas']
     if not session:
-        browser = prepare_selenium(login, senha)
-        session = browser.session
+        session = prepare_selenium_session(login, senha)
     response = get_html(session, 'https://aluno.uffs.edu.br/aluno/restrito/academicos/notas_semestre.xhtml')
     soup = BeautifulSoup(response.content, features="html.parser")
     parse = ParseHTML(soup)
@@ -29,7 +29,7 @@ def get_html(session: str, url: str) -> httpx.get:
 
 
 def prepare_selenium_session(login, senha) -> str:
-    browser = Browser('/home/ballke/PycharmProjects/apiPortalAluno/chromedriver')
+    browser = Browser(ChromeDriverManager().install())
     browser.driver.get('https://id.uffs.edu.br/id/XUI/#login/')
     browser.wait_page(10, 'idToken1', By.ID)
     browser.login(By.ID, 'idToken1', login, 'idToken2', senha, 'loginButton_0')
