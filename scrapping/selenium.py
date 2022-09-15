@@ -16,7 +16,11 @@ class Browser:
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+        chrome_prefs = {}
+        chrome_options.experimental_options["prefs"] = chrome_prefs
+        chrome_prefs["profile.default_content_settings"] = {"images": 2}
+        # browser = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+        browser = webdriver.Chrome(options=chrome_options)
         return browser
 
     def wait_page(self, timeout: int, selector: str, type_selector: By) -> bool:
