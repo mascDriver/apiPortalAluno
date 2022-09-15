@@ -3,7 +3,6 @@ import json
 import httpx
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 
 from scrapping.bs4 import ParseHTML
 from scrapping.selenium import Browser
@@ -29,7 +28,7 @@ def get_html(session: str, url: str) -> httpx.get:
 
 
 def prepare_selenium_session(login, senha) -> str:
-    browser = Browser(ChromeDriverManager().install())
+    browser = Browser()
     browser.driver.get('https://id.uffs.edu.br/id/XUI/#login/')
     browser.wait_page(10, 'idToken1', By.ID)
     browser.login(By.ID, 'idToken1', login, 'idToken2', senha, 'loginButton_0')

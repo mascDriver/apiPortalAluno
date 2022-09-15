@@ -6,3 +6,4 @@ python-dotenv==0.21.0
 selenium==4.4.3
 uvicorn==0.18.3
 webdriver-manager==3.8.3
+email-validator==1.2.1

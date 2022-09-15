@@ -3,11 +3,11 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 class Browser:
-    def __init__(self, path):
-        self.executable_path = path
+    def __init__(self):
         self.driver = self.prepare_browser()
         self.session = None
 
@@ -16,7 +16,7 @@ class Browser:
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        browser = webdriver.Chrome(options=chrome_options, executable_path=self.executable_path)
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         return browser
 
     def wait_page(self, timeout: int, selector: str, type_selector: By) -> bool:
