@@ -1,4 +1,3 @@
-Copycopy code to clipboard
 FROM python:3.8
 
 # Adding trusting keys to apt for repositories
