@@ -18,6 +18,26 @@ Api criada para disponibilizar informações do portal do aluno como api rest ap
 ## 🚀 Começando
 
 ### 1. Primeiro passo para começar
+Inicie o Dockerfile que está na raiz do projeto.
+```shell
+docker build -t apiportalaluno .
+```
+Para primeira execução:
+```shell
+docker run --name apiportalaluno  -dp 8000:8000 apiportalaluno
+```
+Se não for a primeira:
+```shell
+docker start apiportalaluno
+```
+
+
+Acesse:
+```http request
+http://localhost:8000
+```
+
+### 2. Sem Docker:
 
 Comece instalando as dependências com:
 
