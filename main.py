@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 
-from scrapping.data import prepare_selenium_session, notas_semestre
+from scrapping.data import prepare_selenium_session, notas_semestre, notas_matriz
 
 app = FastAPI(
     title='Api Portal do Aluno UFFS',
@@ -27,9 +27,11 @@ security = HTTPBasic()
 
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
-    session = prepare_selenium_session(credentials.username, credentials.password)
-    if session:
-        return User(session=session, username=credentials.username, expiration=datetime.now() + timedelta(minutes=30))
+    browser = prepare_selenium_session(credentials.username, credentials.password)
+    if browser.session:
+        browser.driver.quit()
+        return User(session=browser.session, username=credentials.username,
+                    expiration=datetime.now() + timedelta(minutes=30))
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,9 +43,14 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
 @app.get("/notas_semestre")
 def get_notas_semestre(credentials: HTTPBasicCredentials = Depends(get_current_user)):
     """
-    Pegar notas do semestre atual
-    :param credentials: class
-    :type credentials: dict
-    :return: json
+    Endpoint para acesso a notas do semestre atual
     """
     return notas_semestre(credentials.session)
+
+
+@app.get("/notas_matriz")
+def get_notas_matriz(credentials: HTTPBasicCredentials = Depends(get_current_user)):
+    """
+    Endpoint para acesso a todas as notas ja recebida pelo aluno
+    """
+    return notas_matriz(credentials.session)
