@@ -2,6 +2,7 @@ import json
 
 import httpx
 from bs4 import BeautifulSoup
+from fastapi import HTTPException, status
 from selenium.webdriver.common.by import By
 
 from scrapping.bs4 import ParseHTML
@@ -13,6 +14,11 @@ def notas_matriz(session: str, login=None, senha=None):
         browser = prepare_selenium_session(login, senha)
         session = browser.session
     response = get_html(session, 'https://aluno.uffs.edu.br/aluno/restrito/academicos/acompanhamento_matriz.xhtml')
+    if response.status_code == 302:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session invalid",
+        )
     soup = BeautifulSoup(response.content, features="html.parser")
     parse = ParseHTML(soup)
 
@@ -27,6 +33,11 @@ def notas_semestre(session: str, login=None, senha=None) -> json.dumps:
         browser = prepare_selenium_session(login, senha)
         session = browser.session
     response = get_html(session, 'https://aluno.uffs.edu.br/aluno/restrito/academicos/notas_semestre.xhtml')
+    if response.status_code == 302:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session invalid",
+        )
     soup = BeautifulSoup(response.content, features="html.parser")
     parse = ParseHTML(soup)
 
