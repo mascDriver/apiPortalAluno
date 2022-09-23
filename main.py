@@ -40,17 +40,25 @@ def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     )
 
 
-@app.get("/notas_semestre")
-def get_notas_semestre(credentials: HTTPBasicCredentials = Depends(get_current_user)):
+@app.post("/login")
+def set_login(credentials: HTTPBasicCredentials = Depends(get_current_user)):
+    """
+    Endpoint para login e retorno de sessao para navegar no sistema
+    """
+    return dict(session=credentials.session)
+
+
+@app.get("/notas_semestre/{session}")
+def get_notas_semestre(session: str):
     """
     Endpoint para acesso a notas do semestre atual
     """
-    return notas_semestre(credentials.session)
+    return notas_semestre(session)
 
 
-@app.get("/notas_matriz")
-def get_notas_matriz(credentials: HTTPBasicCredentials = Depends(get_current_user)):
+@app.get("/notas_matriz/{session}")
+def get_notas_matriz(session: str):
     """
     Endpoint para acesso a todas as notas ja recebida pelo aluno
     """
-    return notas_matriz(credentials.session)
+    return notas_matriz(session)
