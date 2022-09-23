@@ -18,6 +18,7 @@ app = FastAPI(
 
 
 class User(BaseModel):
+    name: str
     session: str
     username: str
     expiration: datetime
@@ -29,8 +30,9 @@ security = HTTPBasic()
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     browser = prepare_selenium_session(credentials.username, credentials.password)
     if browser.session:
+        name = browser.driver.find_element(value='frmPrincipal:txtNomeFragCivil').text.strip()
         browser.driver.quit()
-        return User(session=browser.session, username=credentials.username,
+        return User(session=browser.session, username=credentials.username, name=name,
                     expiration=datetime.now() + timedelta(minutes=30))
 
     raise HTTPException(
@@ -45,7 +47,7 @@ def set_login(credentials: HTTPBasicCredentials = Depends(get_current_user)):
     """
     Endpoint para login e retorno de sessao para navegar no sistema
     """
-    return dict(session=credentials.session)
+    return dict(session=credentials.session, name=credentials.name)
 
 
 @app.get("/notas_semestre/{session}")
