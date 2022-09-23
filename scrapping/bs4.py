@@ -26,8 +26,8 @@ class ParseHTML:
     def table_json_by_id(self, names: Union[list, None], type_selector: str, id_selector: str,
                          fetched_selector: str) -> json.dumps:
         result = []
-        for element_selector in self.soup.find(type_selector, id=id_selector):
-            temporary_dict = {}
+        for id, element_selector in enumerate(self.soup.find(type_selector, id=id_selector)):
+            temporary_dict = {'id': id}
             for key, element in enumerate(element_selector.findAll(fetched_selector)):
                 temporary_dict[names[key]] = element.text.strip()
             result.append(temporary_dict)
