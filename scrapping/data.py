@@ -56,13 +56,13 @@ def prepare_selenium_session(login, senha) -> Browser:
     browser = Browser()
     browser.driver.get(
         'https://id.uffs.edu.br/id/XUI/#login/&realm=/&forward=true&spEntityID=uffs%3Aportalaluno%3Asp&goto=%2FSSORedirect%2FmetaAlias%2Fidp%3FReqID%3Da44j2fde4f5fd58b3j680e7ej96ddi7%26index%3Dnull%26acsURL%3Dhttps%253A%252F%252Faluno.uffs.edu.br%253A443%252Faluno%252Fsaml%252FSSO%26spEntityID%3Duffs%253Aportalaluno%253Asp%26binding%3Durn%253Aoasis%253Anames%253Atc%253ASAML%253A2.0%253Abindings%253AHTTP-POST&AMAuthCookie=')
-    browser.wait_page(10, 'idToken1', By.ID)
+    browser.wait_page(2, 'idToken1', By.ID)
     browser.login(By.ID, 'idToken1', login, 'idToken2', senha, 'loginButton_0')
-    browser.wait_page(10, 'input-username', By.ID)
+    browser.wait_page(2, 'input-username', By.ID)
     browser.set_session('JSESSIONID')
     browser.driver.get(f"https://aluno.uffs.edu.br/;jsessionid={browser.session}")
     try:
-        browser.wait_page(10, 'ATIVA', By.PARTIAL_LINK_TEXT)
+        browser.wait_page(1, 'ATIVA', By.PARTIAL_LINK_TEXT)
         browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'ATIVA').click()
     except:
         pass
