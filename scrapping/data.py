@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from scrapping.bs4 import ParseHTML
 from scrapping.selenium import Browser
 
-TIMEOUT_CONNECTION = 3
+TIMEOUT_CONNECTION = 5
 
 
 def notas_matriz(session: str, login=None, senha=None):
