@@ -71,3 +71,14 @@ def prepare_selenium_session(login, senha) -> Browser:
     browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz').click()
     browser.set_session('JSESSIONID')
     return browser
+
+
+def notas_semestre_detalhada(session: str, ccr: str) -> json.dumps:
+    NAMES = ['data', 'avaliacao', 'peso', 'nota', 'rec', 'nota_final', 'instrumentos']
+    browser = Browser()
+    browser.driver.get(f'https://aluno.uffs.edu.br/aluno/restrito/academicos/notas_semestre.xhtml;jsessionid={session}')
+    browser.driver.find_element(By.ID, ccr).click()
+    browser.wait_page(TIMEOUT_CONNECTION, 'ATIVA', By.PARTIAL_LINK_TEXT)
+    soup = BeautifulSoup(browser.driver.page_source, features="html.parser")
+    parse = ParseHTML(soup)
+    return parse.table_json_by_id(NAMES, 'tbody', 'frmDialogNota:dtbAvaliacao_data', 'td')

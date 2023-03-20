@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel
 
-from scrapping.data import prepare_selenium_session, notas_semestre, notas_matriz
+from scrapping.data import prepare_selenium_session, notas_semestre, notas_matriz, notas_semestre_detalhada
 
 app = FastAPI(
     title='Api Portal do Aluno UFFS',
@@ -56,6 +56,14 @@ def get_notas_semestre(session: str):
     Endpoint para acesso a notas do semestre atual
     """
     return notas_semestre(session)
+
+
+@app.get("/notas_semestre/{ccr}/detalhada/{session}")
+def get_notas_semestre(session: str, ccr: str):
+    """
+    Endpoint para acesso a notas detalhadas do semestre atual
+    """
+    return notas_semestre_detalhada(session, ccr)
 
 
 @app.get("/notas_matriz/{session}")
