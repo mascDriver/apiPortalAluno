@@ -30,7 +30,6 @@ def notas_matriz(session: str, login=None, senha=None):
 
 
 def notas_semestre(session: str, login=None, senha=None) -> json.dumps:
-    NAMES = ['ccr', 'turma', 'plano_de_ensino', 'total_de_faltas', 'frequencia', 'media_final', 'notas']
     if not session:
         browser = prepare_selenium_session(login, senha)
         session = browser.session
@@ -43,7 +42,10 @@ def notas_semestre(session: str, login=None, senha=None) -> json.dumps:
     soup = BeautifulSoup(response.content, features="html.parser")
     parse = ParseHTML(soup)
 
-    data = parse.table_json_by_id(NAMES, 'tbody', 'frmPrincipal:tblTurmas_data', 'td')
+    data = parse.table_json_by_id(
+        ['ccr', 'turma', 'plano_de_ensino', 'total_de_faltas', 'frequencia', 'media_final', 'notas'],
+        'tbody', 'frmPrincipal:tblTurmas_data', 'td'
+    )
     return data
 
 
@@ -56,29 +58,36 @@ def get_html(session: str, url: str) -> httpx.get:
 
 def prepare_selenium_session(login, senha) -> Browser:
     browser = Browser()
-    browser.driver.get(
-        'https://id.uffs.edu.br/id/XUI/#login/&realm=/&forward=true&spEntityID=uffs%3Aportalaluno%3Asp&goto=%2FSSORedirect%2FmetaAlias%2Fidp%3FReqID%3Da44j2fde4f5fd58b3j680e7ej96ddi7%26index%3Dnull%26acsURL%3Dhttps%253A%252F%252Faluno.uffs.edu.br%253A443%252Faluno%252Fsaml%252FSSO%26spEntityID%3Duffs%253Aportalaluno%253Asp%26binding%3Durn%253Aoasis%253Anames%253Atc%253ASAML%253A2.0%253Abindings%253AHTTP-POST&AMAuthCookie=')
+    browser.driver.get('https://id.uffs.edu.br/id/XUI/#login/')
     browser.wait_page(TIMEOUT_CONNECTION, 'idToken1', By.ID)
     browser.login(By.ID, 'idToken1', login, 'idToken2', senha, 'loginButton_0')
     browser.wait_page(TIMEOUT_CONNECTION, 'input-username', By.ID)
     browser.set_session('JSESSIONID')
     browser.driver.get(f"https://aluno.uffs.edu.br/;jsessionid={browser.session}")
-    try:
-        browser.wait_page(TIMEOUT_CONNECTION, 'ATIVA', By.PARTIAL_LINK_TEXT)
-        browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'ATIVA').click()
-    except:
-        pass
-    browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz').click()
+    if browser.exists_element(By.PARTIAL_LINK_TEXT, 'ATIVA'):
+        try:
+            browser.wait_page(TIMEOUT_CONNECTION, 'ATIVA', By.PARTIAL_LINK_TEXT)
+            browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'ATIVA').click()
+        except:
+            pass
     browser.set_session('JSESSIONID')
     return browser
 
 
-def notas_semestre_detalhada(session: str, ccr: str) -> json.dumps:
-    NAMES = ['data', 'avaliacao', 'peso', 'nota', 'rec', 'nota_final', 'instrumentos']
+def notas_semestre_detalhada(session: str, ccr_id: int) -> json.dumps:
     browser = Browser()
     browser.driver.get(f'https://aluno.uffs.edu.br/aluno/restrito/academicos/notas_semestre.xhtml;jsessionid={session}')
-    browser.driver.find_element(By.ID, ccr).click()
-    browser.wait_page(TIMEOUT_CONNECTION, 'ATIVA', By.PARTIAL_LINK_TEXT)
+    if browser.driver.current_url.startswith('https://id.uffs.edu.br/id/XUI/#login'):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Session invalid",
+        )
+    browser.wait_page(TIMEOUT_CONNECTION, f'frmPrincipal:tblTurmas:{ccr_id}:btnNotas', By.ID)
+    browser.driver.find_element(By.ID, f'frmPrincipal:tblTurmas:{ccr_id}:btnNotas').click()
+    browser.wait_page(TIMEOUT_CONNECTION, f'frmDialogNota:otpNota', By.ID)
+    browser.driver.save_screenshot('teste.jpg')
     soup = BeautifulSoup(browser.driver.page_source, features="html.parser")
     parse = ParseHTML(soup)
-    return parse.table_json_by_id(NAMES, 'tbody', 'frmDialogNota:dtbAvaliacao_data', 'td')
+    return parse.table_json_by_id(
+        ['data', 'avaliacao', 'peso', 'nota', 'rec', 'nota_final'], 'tbody', 'frmDialogNota:dtbAvaliacao_data', 'td'
+    )

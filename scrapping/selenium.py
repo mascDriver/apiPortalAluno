@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -25,7 +26,7 @@ class Browser:
             browser = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         return browser
 
-    def wait_page(self, timeout: int, selector: str, type_selector: By) -> bool:
+    def wait_page(self, timeout: int, selector: str, type_selector = By.ID) -> bool:
         try:
             WebDriverWait(self.driver, timeout).until(ec.presence_of_element_located((type_selector, selector)))
             return True
@@ -43,3 +44,10 @@ class Browser:
             #JSESSIONID
             if cookie['name'] == name:
                 self.session = cookie['value']
+
+    def exists_element(self, type_selector=By.ID, selector=''):
+        try:
+            self.driver.find_element(type_selector, selector)
+        except NoSuchElementException:
+            return False
+        return True

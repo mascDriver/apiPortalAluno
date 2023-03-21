@@ -30,7 +30,8 @@ security = HTTPBasic()
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     browser = prepare_selenium_session(credentials.username, credentials.password)
     if browser.session:
-        name = browser.driver.find_element(value='frmPrincipal:txtNomeFragCivil').text.strip()
+        browser.wait_page(5, 'frmOpcoesSup')
+        name = browser.driver.find_element(value='frmOpcoesSup').text.split(']')[-1].strip()
         browser.driver.quit()
         return User(session=browser.session, username=credentials.username, name=name,
                     expiration=datetime.now() + timedelta(minutes=30))
@@ -58,12 +59,12 @@ def get_notas_semestre(session: str):
     return notas_semestre(session)
 
 
-@app.get("/notas_semestre/{ccr}/detalhada/{session}")
-def get_notas_semestre(session: str, ccr: str):
+@app.get("/notas_semestre/{ccr_id}/detalhada/{session}")
+def get_notas_semestre(session: str, ccr_id: int):
     """
     Endpoint para acesso a notas detalhadas do semestre atual
     """
-    return notas_semestre_detalhada(session, ccr)
+    return notas_semestre_detalhada(session, ccr_id)
 
 
 @app.get("/notas_matriz/{session}")
