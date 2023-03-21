@@ -84,8 +84,7 @@ def notas_semestre_detalhada(session: str, ccr_id: int) -> json.dumps:
         )
     browser.wait_page(TIMEOUT_CONNECTION, f'frmPrincipal:tblTurmas:{ccr_id}:btnNotas', By.ID)
     browser.driver.find_element(By.ID, f'frmPrincipal:tblTurmas:{ccr_id}:btnNotas').click()
-    browser.wait_page(TIMEOUT_CONNECTION, f'frmDialogNota:otpNota', By.ID)
-    browser.driver.save_screenshot('teste.jpg')
+    browser.wait_page(TIMEOUT_CONNECTION, "//input[@class='ui-datatable-data' and @id='frmDialogNota:dtbAvaliacao_data']", By.XPATH)
     soup = BeautifulSoup(browser.driver.page_source, features="html.parser")
     parse = ParseHTML(soup)
     return parse.table_json_by_id(

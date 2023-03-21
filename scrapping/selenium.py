@@ -26,7 +26,7 @@ class Browser:
             browser = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
         return browser
 
-    def wait_page(self, timeout: int, selector: str, type_selector = By.ID) -> bool:
+    def wait_page(self, timeout: int, selector: str, type_selector=By.ID) -> bool:
         try:
             WebDriverWait(self.driver, timeout).until(ec.presence_of_element_located((type_selector, selector)))
             return True
