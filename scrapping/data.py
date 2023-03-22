@@ -16,7 +16,7 @@ def notas_matriz(session: str, login=None, senha=None):
         browser = prepare_selenium_session(login, senha)
         session = browser.session
     response = get_html(session, 'https://aluno.uffs.edu.br/aluno/restrito/academicos/acompanhamento_matriz.xhtml')
-    if response.status_code == 302:
+    if response.status_code != 200:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session invalid",
@@ -64,12 +64,13 @@ def prepare_selenium_session(login, senha) -> Browser:
     browser.wait_page(TIMEOUT_CONNECTION, 'input-username', By.ID)
     browser.set_session('JSESSIONID')
     browser.driver.get(f"https://aluno.uffs.edu.br/;jsessionid={browser.session}")
+    browser.wait_page(TIMEOUT_CONNECTION, 'ATIVA', By.PARTIAL_LINK_TEXT)
     if browser.exists_element(By.PARTIAL_LINK_TEXT, 'ATIVA'):
         try:
-            browser.wait_page(TIMEOUT_CONNECTION, 'ATIVA', By.PARTIAL_LINK_TEXT)
             browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'ATIVA').click()
         except:
             pass
+    browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz').click()
     browser.set_session('JSESSIONID')
     return browser
 
