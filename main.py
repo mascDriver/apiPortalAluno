@@ -30,8 +30,7 @@ security = HTTPBasic()
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
     browser = prepare_selenium_session(credentials.username, credentials.password)
     if browser.session:
-        browser.wait_page(5, 'frmOpcoesSup')
-        name = browser.driver.find_element(value='frmOpcoesSup').text.split(']')[-1].strip()
+        name = browser.driver.find_element(value='frmPrincipal:txtNomeFragCivil').text.strip()
         browser.driver.quit()
         return User(session=browser.session, username=credentials.username, name=name,
                     expiration=datetime.now() + timedelta(minutes=30))
