@@ -70,9 +70,15 @@ def prepare_selenium_session(login, senha) -> Browser:
             browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'ATIVA').click()
         except:
             pass
-    browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz').click()
-    browser.set_session('JSESSIONID')
-    return browser
+    if browser.exists_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz'):
+        browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz').click()
+        browser.set_session('JSESSIONID')
+        return browser
+
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Incorrect login or password",
+    )
 
 
 def notas_semestre_detalhada(session: str, ccr_id: int) -> json.dumps:
