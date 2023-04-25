@@ -5,7 +5,7 @@
 
 # ApiPortalAluno
 
-Api criada para disponibilizar informações do portal do aluno como api rest após feito scrap nas páginas.
+Api criada para disponibilizar informações do portal do aluno como api rest após feito scrap nas páginas. 
 > **IMPORTANTE:** Api em desenvolvimento, como a montagem da api utiliza de web scrapping tenho que aguardar mais informações na página para terminar o desenvolvimento.
 
 ## ✨ Features
