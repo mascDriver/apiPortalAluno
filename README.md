@@ -1,6 +1,6 @@
 <p align="center">
     <img width="800" src=".github/logo.png" title="Logo do projeto"><br />
-    <img src="https://img.shields.io/maintenance/yes/2022?style=for-the-badge" title="Status do projeto">
+    <img src="https://img.shields.io/maintenance/yes/2023?style=for-the-badge" title="Status do projeto">
 </p>
 
 # ApiPortalAluno
