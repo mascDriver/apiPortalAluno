@@ -91,9 +91,26 @@ def notas_semestre_detalhada(session: str, ccr_id: int) -> json.dumps:
         )
     browser.wait_page(TIMEOUT_CONNECTION, f'frmPrincipal:tblTurmas:{ccr_id}:btnNotas', By.ID)
     browser.driver.find_element(By.ID, f'frmPrincipal:tblTurmas:{ccr_id}:btnNotas').click()
-    browser.wait_page(TIMEOUT_CONNECTION, "//input[@class='ui-datatable-data' and @id='frmDialogNota:dtbAvaliacao_data']", By.XPATH)
+    browser.wait_page(TIMEOUT_CONNECTION,
+                      "//input[@class='ui-datatable-data' and @id='frmDialogNota:dtbAvaliacao_data']", By.XPATH)
     soup = BeautifulSoup(browser.driver.page_source, features="html.parser")
     parse = ParseHTML(soup)
-    return parse.table_json_by_id(
+    nps = parse.table_json_by_id(
         ['data', 'avaliacao', 'peso', 'nota', 'rec', 'nota_final'], 'tbody', 'frmDialogNota:dtbAvaliacao_data', 'td'
     )
+    if browser.exists_element(By.XPATH, '//*[@id="frmDialogNota:dtbAvaliacao_row_0"]/td[8]/span'):
+        num_nps = len(nps)
+        for n in range(num_nps):
+            browser.driver.find_element(By.XPATH,
+                                        value=f'//*[@id="frmDialogNota:dtbAvaliacao_row_{n}"]/td[8]/span').click()
+
+        browser.wait_page(TIMEOUT_CONNECTION, 'frmDialogNota:dtbAvaliacao:0:dtbInstrumentos_data', By.ID)
+        soup = BeautifulSoup(browser.driver.page_source, features="html.parser")
+        parse = ParseHTML(soup)
+
+        for n in range(num_nps):
+            nps[n]['instrumentos'] = parse.table_json_by_id(
+                ['data', 'instrumento', 'peso', 'nota', 'rec', 'nota_rec', 'nota_final'], 'tbody',
+                f'frmDialogNota:dtbAvaliacao:{n}:dtbInstrumentos_data', 'td'
+            )
+    return nps
