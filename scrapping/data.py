@@ -17,10 +17,20 @@ def notas_matriz(session: str, login=None, senha=None):
         session = browser.session
     response = get_html(session, 'https://aluno.uffs.edu.br/aluno/restrito/academicos/acompanhamento_matriz.xhtml')
     if response.status_code != 200:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session invalid",
-        )
+        browser = Browser()
+        browser.driver.get(f'https://aluno.uffs.edu.br/aluno/index_graduacao.xhtml;jsessionid={session}')
+        if browser.exists_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz'):
+            browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz').click()
+            browser.set_session('JSESSIONID')
+
+            response = get_html(browser.session,
+                                'https://aluno.uffs.edu.br/aluno/restrito/academicos/acompanhamento_matriz.xhtml')
+
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Session invalid",
+                )
     soup = BeautifulSoup(response.content, features="html.parser")
     parse = ParseHTML(soup)
 
@@ -70,8 +80,8 @@ def prepare_selenium_session(login, senha) -> Browser:
             browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'ATIVA').click()
         except:
             pass
-    if browser.exists_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz'):
-        browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Acompanhamento da Matriz').click()
+    if browser.exists_element(By.PARTIAL_LINK_TEXT, 'Notas do Semestre'):
+        browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Notas do Semestre').click()
         browser.set_session('JSESSIONID')
         return browser
 
