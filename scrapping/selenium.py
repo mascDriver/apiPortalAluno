@@ -17,6 +17,8 @@ class Browser:
         chrome_options = webdriver.ChromeOptions()
         chrome_options.page_load_strategy = 'eager'
         chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--no-sandbox')
         chrome_prefs = {}
         chrome_options.experimental_options["prefs"] = chrome_prefs
         try:
