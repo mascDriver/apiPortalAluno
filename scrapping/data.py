@@ -68,27 +68,42 @@ def get_html(session: str, url: str) -> httpx.get:
 
 def prepare_selenium_session(login, senha) -> Browser:
     browser = Browser()
-    browser.driver.get('https://id.uffs.edu.br/id/XUI/#login/')
-    browser.wait_page(TIMEOUT_CONNECTION, 'idToken1', By.ID)
-    browser.login(By.ID, 'idToken1', login, 'idToken2', senha, 'loginButton_0')
-    browser.wait_page(TIMEOUT_CONNECTION, 'input-username', By.ID)
-    browser.set_session('JSESSIONID')
-    browser.driver.get(f"https://aluno.uffs.edu.br/;jsessionid={browser.session}")
-    browser.wait_page(TIMEOUT_CONNECTION, 'ATIVA', By.PARTIAL_LINK_TEXT)
-    if browser.exists_element(By.PARTIAL_LINK_TEXT, 'ATIVA'):
-        try:
-            browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'ATIVA').click()
-        except:
-            pass
-    if browser.exists_element(By.PARTIAL_LINK_TEXT, 'Notas do Semestre'):
-        browser.driver.find_element(By.PARTIAL_LINK_TEXT, 'Notas do Semestre').click()
-        browser.set_session('JSESSIONID')
-        return browser
 
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Incorrect login or password",
-    )
+    payload = {'callbacks': [{'type': 'NameCallback', 'output': [{'name': 'prompt', 'value': 'IdUFFS ou CPF'}],
+                              'input': [{'name': 'IDToken1', 'value': f'{login}'}]},
+                             {'type': 'PasswordCallback', 'output': [{'name': 'prompt', 'value': 'Senha'}],
+                              'input': [{'name': 'IDToken2', 'value': f'{senha}'}]}]}
+    headers = {
+        'Content-Type': 'application/json',
+        'Cookie': 'amlbcookie=01'
+    }
+    authentication = httpx.post("https://id.uffs.edu.br/id/json/authenticate", headers=headers, json=payload)
+    if authentication.is_success:
+        browser.driver.get('https://aluno.uffs.edu.br/')
+        browser.driver.add_cookie({'name': 'iPlanetDirectoryPro', 'value': authentication.json()['tokenId']})
+        browser.driver.get('https://aluno.uffs.edu.br/')
+        browser.set_session('JSESSIONID')
+        headers['iPlanetDirectoryPro'] = authentication.json()['tokenId']
+        browser.set_options(httpx.get(f'https://id.uffs.edu.br/id/json/users/{login}', headers=headers).json())
+
+    else:
+        browser.driver.get('https://id.uffs.edu.br/id/XUI/#login/')
+        browser.wait_page(TIMEOUT_CONNECTION, 'idToken1', By.ID)
+        browser.login(By.ID, 'idToken1', login, 'idToken2', senha, 'loginButton_0')
+        browser.wait_page(TIMEOUT_CONNECTION, 'input-username', By.ID)
+        browser.set_session('JSESSIONID')
+        browser.driver.get(f"https://aluno.uffs.edu.br/;jsessionid={browser.session}")
+
+    if not browser.driver.current_url.endswith('.xhtml'):
+        browser.wait_page(TIMEOUT_CONNECTION, 'frmPrincipal:j_idt30:0:lnkMatDesc_')
+        if browser.exists_element(selector='frmPrincipal:j_idt30:0:lnkMatDesc_'):
+            try:
+                browser.driver.find_element(value='frmPrincipal:j_idt30:0:lnkMatDesc_').click()
+            except:
+                pass
+            else:
+                browser.set_session('JSESSIONID')
+    return browser
 
 
 def notas_semestre_detalhada(session: str, ccr_id: int) -> json.dumps:

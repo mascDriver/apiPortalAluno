@@ -11,15 +11,14 @@ class Browser:
     def __init__(self):
         self.driver = self.prepare_browser()
         self.session = None
+        self.options = {}
 
     def prepare_browser(self) -> webdriver.Chrome:
         chrome_options = webdriver.ChromeOptions()
+        chrome_options.page_load_strategy = 'eager'
         chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_prefs = {}
         chrome_options.experimental_options["prefs"] = chrome_prefs
-        chrome_prefs["profile.default_content_settings"] = {"images": 2}
         try:
             browser = webdriver.Chrome(options=chrome_options)
         except:
@@ -44,6 +43,9 @@ class Browser:
             #JSESSIONID
             if cookie['name'] == name:
                 self.session = cookie['value']
+
+    def set_options(self, option: dict) -> None:
+        self.options.update(option)
 
     def exists_element(self, type_selector=By.ID, selector=''):
         try:
